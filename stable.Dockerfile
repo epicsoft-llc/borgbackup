@@ -7,9 +7,7 @@ LABEL image.name="epicsoft_borgbackup" \
       license="MIT"
 
 RUN apk --no-cache add borgbackup \
- && rm -rf /var/cache/apk/* \
- && mkdir /source \
- && mkdir /target
+ && rm -rf /var/cache/apk/*
 
 USER root
 
@@ -17,4 +15,4 @@ WORKDIR /
 
 ENTRYPOINT [ "borg" ]
 
-CMD [ "--version" ]
+CMD [ "--show-version" ]
