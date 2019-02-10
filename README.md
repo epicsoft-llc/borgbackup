@@ -30,18 +30,18 @@ If you need a different version, you may copy and modify my templates as needed.
 
 ###  1.1. <a name='Details'></a>Details
 
-`edge` `latest`
+`edge`
 
 - Use the `edge` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
 - Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
 
-`3.9` `stable`
+`3.9` `latest`
 
 - Use the `3.9` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
 - Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
 
 
-`3.8` 
+`3.8` `stable`
 
 - Use the `3.8` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
 - Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux

@@ -25,6 +25,7 @@ v3.7:
     GIT_STRATEGY: clone
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:3.7 . --build-arg BASE_IMAGE_VERSION=3.7
+    - docker run --rm $CI_REGISTRY_IMAGE:3.7 --version
     - docker push $CI_REGISTRY_IMAGE:3.7
   only:
     - master
@@ -35,6 +36,7 @@ v3.8:
     GIT_STRATEGY: clone
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:3.8 . --build-arg BASE_IMAGE_VERSION=3.8
+    - docker run --rm $CI_REGISTRY_IMAGE:3.8 --version
     - docker push $CI_REGISTRY_IMAGE:3.8
   only:
     - master
@@ -44,35 +46,37 @@ v3.9:
   variables:
     GIT_STRATEGY: clone
   script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.9 . --build-arg BASE_IMAGE_VERSION=3.9
+    - docker build --pull -t $CI_REGISTRY_IMAGE:3.9 -f v3.9.Dockerfile . 
+    - docker run --rm $CI_REGISTRY_IMAGE:3.9 --version
     - docker push $CI_REGISTRY_IMAGE:3.9
   only:
     - master
 
-vEdge:
+edge:
   stage: build
   variables:
     GIT_STRATEGY: clone
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:edge . --build-arg BASE_IMAGE_VERSION=edge
+    - docker run --rm $CI_REGISTRY_IMAGE:edge --version
     - docker push $CI_REGISTRY_IMAGE:edge
   only:
     - master
 
 Stable:
-  stage: version  
+  stage: version
   script:
-    - docker pull $CI_REGISTRY_IMAGE:3.9
-    - docker tag $CI_REGISTRY_IMAGE:3.9 $CI_REGISTRY_IMAGE:stable
+    - docker pull $CI_REGISTRY_IMAGE:3.8
+    - docker tag $CI_REGISTRY_IMAGE:3.8 $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
   only:
     - master
 
 Latest:
-  stage: version 
+  stage: version
   script:
-    - docker pull $CI_REGISTRY_IMAGE:edge
-    - docker tag $CI_REGISTRY_IMAGE:edge $CI_REGISTRY_IMAGE:latest
+    - docker pull $CI_REGISTRY_IMAGE:3.9
+    - docker tag $CI_REGISTRY_IMAGE:3.9 $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     - master
