@@ -5,6 +5,7 @@ services:
 
 stages:
   - build
+  - version 
   - release
 
 variables:
@@ -18,14 +19,60 @@ after_script:
   - docker logout quay.io
   - docker logout $CI_REGISTRY
 
-GitLab:
+v3.7:
   stage: build
   variables:
     GIT_STRATEGY: clone
   script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:stable -f stable.Dockerfile .
+    - docker build --pull -t $CI_REGISTRY_IMAGE:3.7 . --build-arg BASE_IMAGE_VERSION=3.7
+    - docker push $CI_REGISTRY_IMAGE:3.7
+  only:
+    - master
+
+v3.8:
+  stage: build
+  variables:
+    GIT_STRATEGY: clone
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE:3.8 . --build-arg BASE_IMAGE_VERSION=3.8
+    - docker push $CI_REGISTRY_IMAGE:3.8
+  only:
+    - master
+
+v3.9:
+  stage: build
+  variables:
+    GIT_STRATEGY: clone
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE:3.9 . --build-arg BASE_IMAGE_VERSION=3.9
+    - docker push $CI_REGISTRY_IMAGE:3.9
+  only:
+    - master
+
+vEdge:
+  stage: build
+  variables:
+    GIT_STRATEGY: clone
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE:edge . --build-arg BASE_IMAGE_VERSION=edge
+    - docker push $CI_REGISTRY_IMAGE:edge
+  only:
+    - master
+
+Stable:
+  stage: version  
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:3.9
+    - docker tag $CI_REGISTRY_IMAGE:3.9 $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
-    - docker build --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
+  only:
+    - master
+
+Latest:
+  stage: version 
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:edge
+    - docker tag $CI_REGISTRY_IMAGE:edge $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     - master

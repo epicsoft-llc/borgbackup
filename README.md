@@ -23,25 +23,32 @@ A simple Docker image with [BorgBackup](https://borgbackup.readthedocs.io/) and 
 
 ##  1. <a name='Versions'></a>Versions
 
-There is no versioning of this project, the current versions of `stable` and `latest` are being built weekly.
+Versioning uses the Alpine version number, which is also the base image.
 
 If you need a different version, you may copy and modify my templates as needed.
-
-`stable` [Dockerfile](https://gitlab.com/epicdocker/borgbackup/blob/master/stable.Dockerfile)
-
-`latest` [Dockerfile](https://gitlab.com/epicdocker/borgbackup/blob/master/latest.Dockerfile)
 
 
 ###  1.1. <a name='Details'></a>Details
 
-`stable`
-
-- Use the `latest` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
-- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
-
-`latest`
+`edge` `latest`
 
 - Use the `edge` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
+- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
+
+`3.9` `stable`
+
+- Use the `3.9` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
+- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
+
+
+`3.8` 
+
+- Use the `3.8` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
+- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
+
+`3.7`
+
+- Use the `3.7` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
 - Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
 
 
