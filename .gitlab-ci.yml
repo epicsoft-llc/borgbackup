@@ -29,11 +29,7 @@ v3.9-ARM:
   before_script:
     - TAG_VERSION=3.9-arm
     - BASE_IMAGE_VERSION=3.9
-  script: &armBuildScript
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --pull --platform linux/arm/v7 -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$BASE_IMAGE_VERSION
-    - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
-    - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
+  script: *defaultBuildScript
   only: *masterBranch
   tags: &armRunner
     - arm
@@ -54,7 +50,7 @@ v3.10-ARM:
   before_script:
     - TAG_VERSION=3.10-arm
     - BASE_IMAGE_VERSION=3.10
-  script: *armBuildScript
+  script: *defaultBuildScript
   only: *masterBranch
   tags: *armRunner
 
@@ -73,7 +69,7 @@ edge-ARM:
   before_script:
     - TAG_VERSION=edge-arm
     - BASE_IMAGE_VERSION=edge
-  script: *armBuildScript
+  script: *defaultBuildScript
   only: *masterBranch
   tags: *armRunner
 
