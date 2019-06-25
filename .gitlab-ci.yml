@@ -11,12 +11,6 @@ stages:
 before_script:
   - export BORGBACKUP_STABLE=3.8
   - export BORGBACKUP_LATEST=3.9WA
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-
-after_script: 
-  - docker logout
-  - docker logout quay.io
-  - docker logout $CI_REGISTRY
 
 #### Borgbackup on alpine version 3.7
 v3.7:
@@ -24,9 +18,11 @@ v3.7:
   before_script:
     - TAG_VERSION=3.7
   script: &defaultBuildScript
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$TAG_VERSION
     - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
     - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
+    - docker logout $CI_REGISTRY
   only: &masterBranch
     - master
   tags: &sharedRunner
@@ -50,23 +46,24 @@ v3.9:
   only: *masterBranch
   tags: *sharedRunner
 
+#### Borgbackup on alpine version edge
+edge:
+  stage: build
+  before_script:
+    - TAG_VERSION=edge
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: *sharedRunner
+
 #### Borgbackup on alpine version 3.9 with workaround 
 v3.9_WA:
   stage: build
   script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:3.9WA -f v3.9_WA.Dockerfile .
     - docker run --rm $CI_REGISTRY_IMAGE:3.9WA --version
     - docker push $CI_REGISTRY_IMAGE:3.9WA
-  only: *masterBranch
-  tags: *sharedRunner
-
-#### Borgbackup on alpine version edge
-edge:
-  stage: build
-  script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:edge . --build-arg BASE_IMAGE_VERSION=edge
-    - docker run --rm $CI_REGISTRY_IMAGE:edge --version
-    - docker push $CI_REGISTRY_IMAGE:edge
+    - docker logout $CI_REGISTRY
   only: *masterBranch
   tags: *sharedRunner
 
@@ -76,9 +73,11 @@ Stable:
   variables:
     GIT_STRATEGY: none
   script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
+    - docker logout $CI_REGISTRY
   only: *masterBranch
   tags: *sharedRunner
 
@@ -88,9 +87,11 @@ Latest:
   variables:
     GIT_STRATEGY: none
   script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
+    - docker logout $CI_REGISTRY
   only: *masterBranch
   tags: *sharedRunner
 
@@ -108,6 +109,7 @@ DockerHub:
     - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest
     - docker push $DOCKER_HUB_IMAGE:stable
     - docker push $DOCKER_HUB_IMAGE:latest
+    - docker logout
   only: *masterBranch
   tags: *sharedRunner
 
@@ -125,5 +127,6 @@ QuayIO:
     - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest
     - docker push $QUAY_IO_IMAGE:stable
     - docker push $QUAY_IO_IMAGE:latest
+    - docker logout quay.io
   only: *masterBranch
   tags: *sharedRunner
