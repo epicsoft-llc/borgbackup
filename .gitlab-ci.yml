@@ -21,32 +21,34 @@ after_script:
 #### Borgbackup on alpine version 3.7
 v3.7:
   stage: build
-  script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.7 . --build-arg BASE_IMAGE_VERSION=3.7
-    - docker run --rm $CI_REGISTRY_IMAGE:3.7 --version
-    - docker push $CI_REGISTRY_IMAGE:3.7
-  only:
+  before_script:
+    - TAG_VERSION=3.7
+  script: &defaultBuildScript
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$TAG_VERSION
+    - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
+    - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
+  only: &masterBranch
     - master
+  tags: &sharedRunner
+    - shared
 
 #### Borgbackup on alpine version 3.8
 v3.8:
   stage: build
-  script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.8 . --build-arg BASE_IMAGE_VERSION=3.8
-    - docker run --rm $CI_REGISTRY_IMAGE:3.8 --version
-    - docker push $CI_REGISTRY_IMAGE:3.8
-  only:
-    - master
+  before_script:
+    - TAG_VERSION=3.8
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Borgbackup on alpine version 3.9
 v3.9:
   stage: build
-  script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.9 . --build-arg BASE_IMAGE_VERSION=3.9
-    - docker run --rm $CI_REGISTRY_IMAGE:3.9 --version
-    - docker push $CI_REGISTRY_IMAGE:3.9
-  only:
-    - master
+  before_script:
+    - TAG_VERSION=3.9
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Borgbackup on alpine version 3.9 with workaround 
 v3.9_WA:
@@ -55,8 +57,8 @@ v3.9_WA:
     - docker build --pull -t $CI_REGISTRY_IMAGE:3.9WA -f v3.9_WA.Dockerfile .
     - docker run --rm $CI_REGISTRY_IMAGE:3.9WA --version
     - docker push $CI_REGISTRY_IMAGE:3.9WA
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Borgbackup on alpine version edge
 edge:
@@ -65,8 +67,8 @@ edge:
     - docker build --pull -t $CI_REGISTRY_IMAGE:edge . --build-arg BASE_IMAGE_VERSION=edge
     - docker run --rm $CI_REGISTRY_IMAGE:edge --version
     - docker push $CI_REGISTRY_IMAGE:edge
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Borgbackup stable 
 Stable:
@@ -77,8 +79,8 @@ Stable:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Borgbackup latest
 Latest:
@@ -89,8 +91,8 @@ Latest:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Docker hub release
 DockerHub:
@@ -106,8 +108,8 @@ DockerHub:
     - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest
     - docker push $DOCKER_HUB_IMAGE:stable
     - docker push $DOCKER_HUB_IMAGE:latest
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
 
 #### Quay IO release
 QuayIO:
@@ -123,5 +125,5 @@ QuayIO:
     - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest
     - docker push $QUAY_IO_IMAGE:stable
     - docker push $QUAY_IO_IMAGE:latest
-  only:
-    - master
+  only: *masterBranch
+  tags: *sharedRunner
