@@ -78,12 +78,14 @@ Stable:
   stage: version
   variables:
     GIT_STRATEGY: none
-  script:
-    - BORGBACKUP_STABLE=3.9
+  before_script: 
+    - SOURCE_TAG=3.9
+    - TARGET_TAG=stable
+  script: &changeTagScript
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE
-    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE $CI_REGISTRY_IMAGE:stable
-    - docker push $CI_REGISTRY_IMAGE:stable
+    - docker pull $CI_REGISTRY_IMAGE:$SOURCE_TAG
+    - docker tag $CI_REGISTRY_IMAGE:$SOURCE_TAG $CI_REGISTRY_IMAGE:$TARGET_TAG
+    - docker push $CI_REGISTRY_IMAGE:$TARGET_TAG
   only: *masterBranch
   tags: *sharedRunner
 
@@ -91,11 +93,10 @@ Stable-ARM:
   stage: version
   variables:
     GIT_STRATEGY: none
-  script:
-    - BORGBACKUP_STABLE_ARM=3.9-arm
-    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM
-    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM $CI_REGISTRY_IMAGE:stable-arm
-    - docker push $CI_REGISTRY_IMAGE:stable-arm
+  before_script: 
+    - SOURCE_TAG=3.9-arm
+    - TARGET_TAG=stable-arm
+  script: *changeTagScript
   only: *masterBranch
   tags: *armRunner
 
@@ -104,12 +105,10 @@ Latest:
   stage: version
   variables:
     GIT_STRATEGY: none
-  script:
-    - BORGBACKUP_LATEST=3.10
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST
-    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:latest
+  before_script: 
+    - SOURCE_TAG=3.10
+    - TARGET_TAG=latest
+  script: *changeTagScript
   only: *masterBranch
   tags: *sharedRunner
 
@@ -117,11 +116,10 @@ Latest-ARM:
   stage: version
   variables:
     GIT_STRATEGY: none
-  script:
-    - BORGBACKUP_LATEST_ARM=3.10-arm
-    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM
-    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM $CI_REGISTRY_IMAGE:latest-arm
-    - docker push $CI_REGISTRY_IMAGE:latest-arm
+  before_script: 
+    - SOURCE_TAG=3.10-arm
+    - TARGET_TAG=latest-arm
+  script: *changeTagScript
   only: *masterBranch
   tags: *armRunner
 
@@ -151,8 +149,8 @@ DockerHub-ARM:
     - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_PASS"
     - docker pull $CI_REGISTRY_IMAGE:stable-arm
     - docker pull $CI_REGISTRY_IMAGE:latest-arm
-    - docker tag $CI_REGISTRY_IMAGE:stable $DOCKER_HUB_IMAGE:stable-arm
-    - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest-arm
+    - docker tag $CI_REGISTRY_IMAGE:stable-arm $DOCKER_HUB_IMAGE:stable-arm
+    - docker tag $CI_REGISTRY_IMAGE:latest-arm $DOCKER_HUB_IMAGE:latest-arm
     - docker push $DOCKER_HUB_IMAGE:stable-arm
     - docker push $DOCKER_HUB_IMAGE:latest-arm
   only: *masterBranch
@@ -184,8 +182,8 @@ QuayIO-ARM:
     - docker login -u="$QUAY_IO_USER" -p="$QUAY_IO_PASS" quay.io
     - docker pull $CI_REGISTRY_IMAGE:stable-arm
     - docker pull $CI_REGISTRY_IMAGE:latest-arm
-    - docker tag $CI_REGISTRY_IMAGE:stable $QUAY_IO_IMAGE:stable-arm
-    - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest-arm
+    - docker tag $CI_REGISTRY_IMAGE:stable-arm $QUAY_IO_IMAGE:stable-arm
+    - docker tag $CI_REGISTRY_IMAGE:latest-arm $QUAY_IO_IMAGE:latest-arm
     - docker push $QUAY_IO_IMAGE:stable-arm
     - docker push $QUAY_IO_IMAGE:latest-arm
   only: *masterBranch
