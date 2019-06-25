@@ -84,13 +84,20 @@ Stable:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
-    #### ARM
-    - BORGBACKUP_STABLE_ARM=$BORGBACKUP_STABLE-arm
+  only: *masterBranch
+  tags: *sharedRunner
+
+Stable-ARM:
+  stage: version
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - BORGBACKUP_STABLE_ARM=3.9-arm
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM $CI_REGISTRY_IMAGE:stable-arm
     - docker push $CI_REGISTRY_IMAGE:stable-arm
   only: *masterBranch
-  tags: *sharedRunner
+  tags: *armRunner
 
 #### Borgbackup latest
 Latest:
@@ -111,6 +118,18 @@ Latest:
   only: *masterBranch
   tags: *sharedRunner
 
+Latest-ARM:
+  stage: version
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - BORGBACKUP_LATEST_ARM=3.10-arm
+    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM
+    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM $CI_REGISTRY_IMAGE:latest-arm
+    - docker push $CI_REGISTRY_IMAGE:latest-arm
+  only: *masterBranch
+  tags: *armRunner
+
 #### Docker hub release
 DockerHub:
   stage: release
@@ -125,7 +144,16 @@ DockerHub:
     - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest
     - docker push $DOCKER_HUB_IMAGE:stable
     - docker push $DOCKER_HUB_IMAGE:latest
-    #### ARM
+  only: *masterBranch
+  tags: *sharedRunner
+
+DockerHub-ARM:
+  stage: release
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - DOCKER_HUB_IMAGE="epicsoft/borgbackup"
+    - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_PASS"
     - docker pull $CI_REGISTRY_IMAGE:stable-arm
     - docker pull $CI_REGISTRY_IMAGE:latest-arm
     - docker tag $CI_REGISTRY_IMAGE:stable $DOCKER_HUB_IMAGE:stable-arm
@@ -133,7 +161,7 @@ DockerHub:
     - docker push $DOCKER_HUB_IMAGE:stable-arm
     - docker push $DOCKER_HUB_IMAGE:latest-arm
   only: *masterBranch
-  tags: *sharedRunner
+  tags: *armRunner
 
 #### Quay IO release
 QuayIO:
@@ -158,3 +186,19 @@ QuayIO:
     - docker push $QUAY_IO_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
+
+QuayIO-ARM:
+  stage: release
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - QUAY_IO_IMAGE="quay.io/epicsoft/borgbackup"
+    - docker login -u="$QUAY_IO_USER" -p="$QUAY_IO_PASS" quay.io
+    - docker pull $CI_REGISTRY_IMAGE:stable-arm
+    - docker pull $CI_REGISTRY_IMAGE:latest-arm
+    - docker tag $CI_REGISTRY_IMAGE:stable $QUAY_IO_IMAGE:stable-arm
+    - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest-arm
+    - docker push $QUAY_IO_IMAGE:stable-arm
+    - docker push $QUAY_IO_IMAGE:latest-arm
+  only: *masterBranch
+  tags: *armRunner
