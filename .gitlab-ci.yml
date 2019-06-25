@@ -45,6 +45,15 @@ v3.10:
   only: *masterBranch
   tags: *sharedRunner
 
+v3.10-ARM:
+  stage: build
+  before_script:
+    - TAG_VERSION=3.10-arm
+    - BASE_IMAGE_VERSION=3.10
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: *armRunner
+
 #### Borgbackup on alpine version edge
 edge:
   stage: build
@@ -54,6 +63,15 @@ edge:
   script: *defaultBuildScript
   only: *masterBranch
   tags: *sharedRunner
+
+edge-ARM:
+  stage: build
+  before_script:
+    - TAG_VERSION=edge-arm
+    - BASE_IMAGE_VERSION=edge
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: *armRunner
 
 #### Borgbackup stable 
 Stable:
@@ -66,6 +84,11 @@ Stable:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE $CI_REGISTRY_IMAGE:stable
     - docker push $CI_REGISTRY_IMAGE:stable
+    #### ARM
+    - BORGBACKUP_STABLE_ARM=$BORGBACKUP_STABLE-arm
+    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM
+    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_STABLE_ARM $CI_REGISTRY_IMAGE:stable-arm
+    - docker push $CI_REGISTRY_IMAGE:stable-arm
   only: *masterBranch
   tags: *sharedRunner
 
@@ -80,6 +103,11 @@ Latest:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
+    #### ARM
+    - BORGBACKUP_LATEST_ARM=$BORGBACKUP_LATEST-arm
+    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM
+    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM $CI_REGISTRY_IMAGE:latest-arm
+    - docker push $CI_REGISTRY_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
 
@@ -97,6 +125,13 @@ DockerHub:
     - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest
     - docker push $DOCKER_HUB_IMAGE:stable
     - docker push $DOCKER_HUB_IMAGE:latest
+    #### ARM
+    - docker pull $CI_REGISTRY_IMAGE:stable-arm
+    - docker pull $CI_REGISTRY_IMAGE:latest-arm
+    - docker tag $CI_REGISTRY_IMAGE:stable $DOCKER_HUB_IMAGE:stable-arm
+    - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_HUB_IMAGE:latest-arm
+    - docker push $DOCKER_HUB_IMAGE:stable-arm
+    - docker push $DOCKER_HUB_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
 
@@ -114,5 +149,12 @@ QuayIO:
     - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest
     - docker push $QUAY_IO_IMAGE:stable
     - docker push $QUAY_IO_IMAGE:latest
+    #### ARM
+    - docker pull $CI_REGISTRY_IMAGE:stable-arm
+    - docker pull $CI_REGISTRY_IMAGE:latest-arm
+    - docker tag $CI_REGISTRY_IMAGE:stable $QUAY_IO_IMAGE:stable-arm
+    - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest-arm
+    - docker push $QUAY_IO_IMAGE:stable-arm
+    - docker push $QUAY_IO_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
