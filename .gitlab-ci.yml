@@ -8,39 +8,20 @@ stages:
   - version 
   - release
 
-#### Borgbackup on alpine version 3.7
-v3.7:
-  stage: build
-  before_script:
-    - TAG_VERSION=3.7
-  script: &defaultBuildScript
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --pull -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$TAG_VERSION
-    - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
-    - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
-    - docker logout $CI_REGISTRY
-  only: &masterBranch
-    - master
-  tags: &sharedRunner
-    - shared
-
-#### Borgbackup on alpine version 3.8
-v3.8:
-  stage: build
-  before_script:
-    - TAG_VERSION=3.8
-  script: *defaultBuildScript
-  only: *masterBranch
-  tags: *sharedRunner
-
 #### Borgbackup on alpine version 3.9
 v3.9:
   stage: build
   before_script:
     - TAG_VERSION=3.9
-  script: *defaultBuildScript
-  only: *masterBranch
-  tags: *sharedRunner
+  script: &defaultBuildScript
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build --pull -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$TAG_VERSION
+    - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
+    - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
+  only: &masterBranch
+    - master
+  tags: &sharedRunner
+    - shared
 
 #### Borgbackup on alpine version 3.10
 v3.10:
@@ -57,18 +38,6 @@ edge:
   before_script:
     - TAG_VERSION=edge
   script: *defaultBuildScript
-  only: *masterBranch
-  tags: *sharedRunner
-
-#### Borgbackup on alpine version 3.9 with workaround 
-v3.9_WA:
-  stage: build
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.9WA -f v3.9_WA.Dockerfile .
-    - docker run --rm $CI_REGISTRY_IMAGE:3.9WA --version
-    - docker push $CI_REGISTRY_IMAGE:3.9WA
-    - docker logout $CI_REGISTRY
   only: *masterBranch
   tags: *sharedRunner
 
