@@ -110,11 +110,6 @@ Latest:
     - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST
     - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
-    #### ARM
-    - BORGBACKUP_LATEST_ARM=$BORGBACKUP_LATEST-arm
-    - docker pull $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM
-    - docker tag $CI_REGISTRY_IMAGE:$BORGBACKUP_LATEST_ARM $CI_REGISTRY_IMAGE:latest-arm
-    - docker push $CI_REGISTRY_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
 
@@ -177,13 +172,6 @@ QuayIO:
     - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest
     - docker push $QUAY_IO_IMAGE:stable
     - docker push $QUAY_IO_IMAGE:latest
-    #### ARM
-    - docker pull $CI_REGISTRY_IMAGE:stable-arm
-    - docker pull $CI_REGISTRY_IMAGE:latest-arm
-    - docker tag $CI_REGISTRY_IMAGE:stable $QUAY_IO_IMAGE:stable-arm
-    - docker tag $CI_REGISTRY_IMAGE:latest $QUAY_IO_IMAGE:latest-arm
-    - docker push $QUAY_IO_IMAGE:stable-arm
-    - docker push $QUAY_IO_IMAGE:latest-arm
   only: *masterBranch
   tags: *sharedRunner
 
