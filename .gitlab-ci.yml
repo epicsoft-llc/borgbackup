@@ -23,6 +23,16 @@ v3.9:
   tags: &sharedRunner
     - shared
 
+v3.9-ARM:
+  stage: build
+  before_script:
+    - TAG_VERSION=3.9-arm
+  script: *defaultBuildScript
+  only: *masterBranch
+  tags: &armRunner
+    - arm
+    - docker
+
 #### Borgbackup on alpine version 3.10
 v3.10:
   stage: build
