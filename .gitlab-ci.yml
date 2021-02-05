@@ -5,15 +5,15 @@ services:
 
 stages:
   - build
-  - version 
+  - version
   - release
 
-#### Borgbackup on alpine version 3.9
-v3.9:
+#### Borgbackup on alpine version latest
+latest:
   stage: build
   before_script:
-    - TAG_VERSION=3.9
-    - BASE_IMAGE_VERSION=3.9
+    - TAG_VERSION=latest
+    - BASE_IMAGE_VERSION=latest
   script: &defaultBuildScript
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build --pull -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg BASE_IMAGE_VERSION=$BASE_IMAGE_VERSION
@@ -23,36 +23,6 @@ v3.9:
     - master
   tags: &sharedRunner
     - shared
-
-v3.9-ARM:
-  stage: build
-  before_script:
-    - TAG_VERSION=3.9-arm
-    - BASE_IMAGE_VERSION=3.9
-  script: *defaultBuildScript
-  only: *masterBranch
-  tags: &armRunner
-    - arm
-    - docker
-
-#### Borgbackup on alpine version 3.10
-v3.10:
-  stage: build
-  before_script:
-    - TAG_VERSION=3.10
-    - BASE_IMAGE_VERSION=3.10
-  script: *defaultBuildScript
-  only: *masterBranch
-  tags: *sharedRunner
-
-v3.10-ARM:
-  stage: build
-  before_script:
-    - TAG_VERSION=3.10-arm
-    - BASE_IMAGE_VERSION=3.10
-  script: *defaultBuildScript
-  only: *masterBranch
-  tags: *armRunner
 
 #### Borgbackup on alpine version edge
 edge:
@@ -64,23 +34,26 @@ edge:
   only: *masterBranch
   tags: *sharedRunner
 
-edge-ARM:
+#### Borgbackup on alpine version 3.13
+v3.13:
   stage: build
   before_script:
-    - TAG_VERSION=edge-arm
-    - BASE_IMAGE_VERSION=edge
+    - TAG_VERSION=3.13
+    - BASE_IMAGE_VERSION=3.13
   script: *defaultBuildScript
   only: *masterBranch
-  tags: *armRunner
+  tags: *sharedRunner
 
-#### Borgbackup stable 
+#### Borgbackup stable
 Stable:
   stage: version
   variables:
     GIT_STRATEGY: none
-  before_script: 
-    - SOURCE_TAG=3.9
+  before_script:
+    - SOURCE_TAG=3.13
     - TARGET_TAG=stable
+  after_script:
+    - docker logout $CI_REGISTRY
   script: &changeTagScript
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY_IMAGE:$SOURCE_TAG
@@ -89,70 +62,29 @@ Stable:
   only: *masterBranch
   tags: *sharedRunner
 
-Stable-ARM:
-  stage: version
-  variables:
-    GIT_STRATEGY: none
-  before_script: 
-    - SOURCE_TAG=3.9-arm
-    - TARGET_TAG=stable-arm
-  script: *changeTagScript
-  only: *masterBranch
-  tags: *sharedRunner
-
-#### Borgbackup latest
-Latest:
-  stage: version
-  variables:
-    GIT_STRATEGY: none
-  before_script: 
-    - SOURCE_TAG=3.10
-    - TARGET_TAG=latest
-  script: *changeTagScript
-  only: *masterBranch
-  tags: *sharedRunner
-
-Latest-ARM:
-  stage: version
-  variables:
-    GIT_STRATEGY: none
-  before_script: 
-    - SOURCE_TAG=3.10-arm
-    - TARGET_TAG=latest-arm
-  script: *changeTagScript
-  only: *masterBranch
-  tags: *sharedRunner
-
 #### Docker hub release
 DockerHub:
   stage: release
   variables:
     GIT_STRATEGY: none
-  before_script: 
+  before_script:
     - DOCKER_REGISTRY="epicsoft/borgbackup"
-    - STABLE_TAG=stable
-    - LATEST_TAG=latest
     - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_PASS"
+  after_script:
+    - docker logout
   script: &releaseScript
-    - docker pull $CI_REGISTRY_IMAGE:$STABLE_TAG
-    - docker pull $CI_REGISTRY_IMAGE:$LATEST_TAG
-    - docker tag $CI_REGISTRY_IMAGE:$STABLE_TAG $DOCKER_REGISTRY:$STABLE_TAG
-    - docker tag $CI_REGISTRY_IMAGE:$LATEST_TAG $DOCKER_REGISTRY:$LATEST_TAG
-    - docker push $DOCKER_REGISTRY:$STABLE_TAG
-    - docker push $DOCKER_REGISTRY:$LATEST_TAG
-  only: *masterBranch
-  tags: *sharedRunner
-
-DockerHub-ARM:
-  stage: release
-  variables:
-    GIT_STRATEGY: none
-  before_script: 
-    - DOCKER_REGISTRY="epicsoft/borgbackup"
-    - STABLE_TAG=stable-arm
-    - LATEST_TAG=latest-arm
-    - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_PASS"
-  script: *releaseScript
+    #### latest
+    - docker pull $CI_REGISTRY_IMAGE:latest
+    - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_REGISTRY:latest
+    - docker push $DOCKER_REGISTRY:latest
+    #### stable
+    - docker pull $CI_REGISTRY_IMAGE:stable
+    - docker tag $CI_REGISTRY_IMAGE:stable $DOCKER_REGISTRY:stable
+    - docker push $DOCKER_REGISTRY:stable
+    #### edge
+    - docker pull $CI_REGISTRY_IMAGE:edge
+    - docker tag $CI_REGISTRY_IMAGE:edge $DOCKER_REGISTRY:edge
+    - docker push $DOCKER_REGISTRY:edge
   only: *masterBranch
   tags: *sharedRunner
 
@@ -161,24 +93,11 @@ QuayIO:
   stage: release
   variables:
     GIT_STRATEGY: none
-  before_script: 
+  before_script:
     - DOCKER_REGISTRY="quay.io/epicsoft/borgbackup"
-    - STABLE_TAG=stable
-    - LATEST_TAG=latest
     - docker login -u="$QUAY_IO_USER" -p="$QUAY_IO_PASS" quay.io
-  script: *releaseScript
-  only: *masterBranch
-  tags: *sharedRunner
-
-QuayIO-ARM:
-  stage: release
-  variables:
-    GIT_STRATEGY: none
-  before_script: 
-    - DOCKER_REGISTRY="quay.io/epicsoft/borgbackup"
-    - STABLE_TAG=stable-arm
-    - LATEST_TAG=latest-arm
-    - docker login -u="$QUAY_IO_USER" -p="$QUAY_IO_PASS" quay.io
+  after_script:
+    - docker logout quay.io
   script: *releaseScript
   only: *masterBranch
   tags: *sharedRunner
