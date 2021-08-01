@@ -8,6 +8,7 @@ LABEL image.name="epicsoft_borgbackup" \
       license="MIT"
 
 RUN apk --no-cache add borgbackup \
+                       py3-packaging \
  && rm -rf /var/cache/apk/*
 
 USER root
