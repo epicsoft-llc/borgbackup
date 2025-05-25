@@ -24,6 +24,8 @@ latest:
     - docker build --pull --no-cache -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg IMAGE_TAG=$BASE_IMAGE_VERSION --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
     - docker push $CI_REGISTRY_IMAGE:$TAG_VERSION
+    - docker tag $CI_REGISTRY_IMAGE:$TAG_VERSION $DOCKER_REGISTRY:$TAG_VERSION
+    - docker push $DOCKER_REGISTRY:$TAG_VERSION
   only:
     - master
 
@@ -45,7 +47,7 @@ v3.21:
   only:
     - master
 
-Stable:
+stable:
   stage: version
   variables:
     SOURCE_TAG: "3.21"
@@ -57,31 +59,6 @@ Stable:
     - docker push $CI_REGISTRY_IMAGE:$TARGET_TAG
   only:
     - master
-
-#### Docker hub release
-DockerHub:
-  stage: release
-  variables:
-    DOCKER_REGISTRY: epicsoft/borgbackup
-    GIT_STRATEGY: none
-  before_script:
-    - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_PASS"
-  script:
-    #### latest
-    - docker pull $CI_REGISTRY_IMAGE:latest
-    - docker tag $CI_REGISTRY_IMAGE:latest $DOCKER_REGISTRY:latest
-    - docker push $DOCKER_REGISTRY:latest
-    #### stable
-    - docker pull $CI_REGISTRY_IMAGE:stable
-    - docker tag $CI_REGISTRY_IMAGE:stable $DOCKER_REGISTRY:stable
-    - docker push $DOCKER_REGISTRY:stable
-    #### edge
-    - docker pull $CI_REGISTRY_IMAGE:edge
-    - docker tag $CI_REGISTRY_IMAGE:edge $DOCKER_REGISTRY:edge
-    - docker push $DOCKER_REGISTRY:edge
-  only:
-    - master
-
 
 uploadReadme:
   stage: release
