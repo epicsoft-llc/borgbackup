@@ -26,6 +26,7 @@ latest:
     BASE_IMAGE_VERSION: latest
   script: &defaultBuildScript
     - echo "Build BorgBackup Docker image with version '${TAG_VERSION}'"
+    - docker buildx use epicbuilder > /dev/null 2>&1 || docker buildx create --name epicbuilder --use > /dev/null 2>&1 && docker buildx inspect epicbuilder --bootstrap > /dev/null 2>&1
     - docker buildx build . --push --pull --no-cache
         --platform linux/amd64,linux/arm64
         -t $CI_REGISTRY_IMAGE:$TAG_VERSION
