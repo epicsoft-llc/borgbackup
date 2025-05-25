@@ -30,7 +30,7 @@ latest:
     - docker buildx build . --push --pull --no-cache
         --platform linux/amd64,linux/arm64
         -t $CI_REGISTRY_IMAGE:$TAG_VERSION
-        - $DOCKER_REGISTRY:$TAG_VERSION
+        -t $DOCKER_REGISTRY:$TAG_VERSION
         --build-arg IMAGE_TAG=$BASE_IMAGE_VERSION
         --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
