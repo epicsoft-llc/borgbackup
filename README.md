@@ -37,7 +37,7 @@ Alpine packages are installed in the current image in the latest version - https
 Displays the version and help from BorgBackup
 
 ```bash
-docker run --rm registry.gitlab.com/epicdocker/borgbackup:latest
+docker run --rm epicsoft/borgbackup:latest
 ```
 
 ```bash
@@ -45,7 +45,6 @@ docker run --rm registry.gitlab.com/epicdocker/borgbackup:latest
 > usage: borg [-V] [-h] [--critical] [--error] [--warning] [--info] [--debug]
 > ...
 ```
-
 
 ### Initialize a repository
 
@@ -55,8 +54,7 @@ After entering the password, the repository is created in the `/target` director
 docker run --rm -it --name borg \
   -v /tmp/backup/target:/target \
   -v /tmp/backup/source:/source:ro \
-  registry.gitlab.com/epicdocker/borgbackup:latest \
-  init --encryption=repokey /target
+  epicsoft/borgbackup:latest init --encryption=repokey /target
 ```
 
 ```bash
@@ -73,8 +71,7 @@ docker run --rm -it --name borg \
   -e BORG_PASSPHRASE=secret \
   -v /tmp/backup/target:/target \
   -v /tep/backup/source:/source:ro \
-  registry.gitlab.com/epicdocker/borgbackup:latest \
-  create /target::archiveName /source --stats
+  epicsoft/borgbackup:latest create /target::archiveName /source --stats
 ```
 
 ```bash
@@ -93,8 +90,7 @@ docker run --rm -it --name borg \
   -e BORG_PASSPHRASE=secret \
   -v /tmp/backup/target:/target \
   -v /tmp/backup/source:/source:ro \
-  registry.gitlab.com/epicdocker/borgbackup:latest \
-  list /target
+  epicsoft/borgbackup:latest list /target
 ```
 
 ```bash
