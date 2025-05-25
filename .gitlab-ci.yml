@@ -20,6 +20,7 @@ latest:
   variables:
     TAG_VERSION: latest
     BASE_IMAGE_VERSION: latest
+    DOCKER_REGISTRY: epicsoft/borgbackup
   script: &defaultBuildScript
     - docker build --pull --no-cache -t $CI_REGISTRY_IMAGE:$TAG_VERSION . --build-arg IMAGE_TAG=$BASE_IMAGE_VERSION --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
@@ -34,6 +35,7 @@ edge:
   variables:
     TAG_VERSION: edge
     BASE_IMAGE_VERSION: edge
+    DOCKER_REGISTRY: epicsoft/borgbackup
   script: *defaultBuildScript
   only:
     - master
@@ -43,11 +45,12 @@ v3.21:
   variables:
     TAG_VERSION: "3.21"
     BASE_IMAGE_VERSION: "3.21"
+    DOCKER_REGISTRY: epicsoft/borgbackup
   script: *defaultBuildScript
   only:
     - master
 
-stable:
+Stable:
   stage: version
   variables:
     SOURCE_TAG: "3.21"
