@@ -5,10 +5,10 @@ This Docker image is managed and kept up to date by [epicsoft LLC](https://epics
 A simple Docker image with [BorgBackup](https://borgbackup.readthedocs.io/) and based on official [Alpine image](https://hub.docker.com/_/alpine).
 
 * Base image: https://hub.docker.com/_/alpine
-* Dockerfile: https://gitlab.com/epicsoft-networks/zitadel-tools/blob/main/Dockerfile
-* Repository: https://gitlab.com/epicsoft-networks/zitadel-tools/tree/main
-* Container-Registry: https://gitlab.com/epicsoft-networks/zitadel-tools/container_registry
-* Docker Hub: https://hub.docker.com/r/epicsoft/zitadel-tools
+* Dockerfile: https://gitlab.com/epicsoft-networks/borgbackup/blob/main/Dockerfile
+* Repository: https://gitlab.com/epicsoft-networks/borgbackup/tree/main
+* Container-Registry: https://gitlab.com/epicsoft-networks/borgbackup/container_registry
+* Docker Hub: https://hub.docker.com/r/epicsoft/borgbackup
 
 ## Versions
 
@@ -115,6 +115,6 @@ docker run --rm -it --name borg \
 
 ## License
 
-MIT License see [LICENSE](https://gitlab.com/epicdocker/borgbackup/blob/master/LICENSE)
+MIT License see [LICENSE](https://gitlab.com/epicsoft-networks/borgbackup/blob/master/LICENSE)
 
 Please note that the MIT license only applies to the files created by epicsoft LLC. Other software may be licensed under other licenses.
