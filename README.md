@@ -12,26 +12,15 @@ A simple Docker image with [BorgBackup](https://borgbackup.readthedocs.io/) and 
 
 ## Versions
 
-Versioning uses the Alpine version number, which is also the base image.
+`edge` based on `alpine:edge` - build `weekly`
 
-If you need a different version, you may copy and modify my templates as needed.
+`latest` based on `alpine:latest` - build `weekly`
 
-###  1.1. <a name='Details'></a>Details
+`3.21` `stable` based on `alpine:3.21` - build `weekly`
 
-`edge`
+The Docker images use the official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as the base image.
 
-- Use the `edge` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
-- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
-
-`latest`
-
-- Use the `latest` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
-- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
-
-`3.21` `stable`
-
-- Use the `3.21` official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as base image
-- Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
+Installs the current [BorgBackup](https://borgbackup.readthedocs.io/) version from the [Alpine Linux packages](https://pkgs.alpinelinux.org/) depending on the Apline Linux
 
 ## Additional Alpine packages
 
