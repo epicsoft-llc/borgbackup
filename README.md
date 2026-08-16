@@ -16,7 +16,7 @@ A simple Docker image with [BorgBackup](https://borgbackup.readthedocs.io/) and 
 
 `latest` based on `alpine:latest` - build `weekly`
 
-`3.21` `stable` based on `alpine:3.21` - build `weekly`
+`3.24` `stable` based on `alpine:3.24` - build `weekly`
 
 The Docker images use the official [Alpine Linux](https://hub.docker.com/_/alpine/) Docker image as the base image.
 
@@ -41,7 +41,7 @@ docker run --rm epicsoft/borgbackup:latest
 ```
 
 ```bash
-> borgbackup version 1.4.0
+> borgbackup version 1.4.4
 > usage: borg [-V] [-h] [--critical] [--error] [--warning] [--info] [--debug]
 > ...
 ```

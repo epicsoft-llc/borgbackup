@@ -47,11 +47,11 @@ edge:
   only:
     - master
 
-v3.21:
+v3.24:
   stage: build
   variables:
-    TAG_VERSION: "3.21"
-    BASE_IMAGE_VERSION: "3.21"
+    TAG_VERSION: "3.24"
+    BASE_IMAGE_VERSION: "3.24"
   script: *defaultBuildScript
   only:
     - master
@@ -59,7 +59,7 @@ v3.21:
 stable:
   stage: version
   variables:
-    SOURCE_TAG: "3.21"
+    SOURCE_TAG: "3.24"
     TARGET_TAG: stable
     GIT_STRATEGY: none
   script:

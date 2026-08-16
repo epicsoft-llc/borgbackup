@@ -14,7 +14,7 @@ LABEL image.name="epicsoft_borgbackup" \
       image.description="Simple BorgBackup Docker Image" \
       maintainer="epicsoft LLC" \
       maintainer.name="Alexander Schwarz <as@epicsoft.one>" \
-      maintainer.copyright="Copyright 2022-2025 epicsoft LLC" \
+      maintainer.copyright="Copyright 2022-2026 epicsoft LLC" \
       license="MIT"
 
 RUN apk --no-cache add borgbackup \
