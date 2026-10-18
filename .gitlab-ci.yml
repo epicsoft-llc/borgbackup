@@ -1,84 +1,164 @@
 stages:
   - build
-  - version
   - release
-
-image: docker:latest
-
-services:
-  - docker:dind
 
 variables:
   DOCKER_REGISTRY: "epicsoft/borgbackup"
+  BUILD_PLATFORMS: "linux/amd64,linux/arm64"
   BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
+  #### The Alpine line behind 'stable' and every release.
+  STABLE_VERSION: "3.24"
 
-before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  - docker login -u="$DOCKER_HUB_USER" -p="$DOCKER_HUB_TOKEN"
+#### The tokens go in over stdin: '-p' would put them in the process list of the runner.
+#### The dind service runs with TLS, and buildx takes TLS settings only from a context, not from the environment.
+.docker:
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+    - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+    - docker context create dind
+    - docker buildx create --name epicbuilder --driver docker-container --use dind
+  after_script:
+    - docker logout $CI_REGISTRY
+    - docker logout
 
-after_script:
-  - docker logout
-  - docker logout $CI_REGISTRY
+.branch:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+.tag:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+
+#### A multi-platform build cannot be loaded locally, so the runner's own platform is built and tested
+#### first; the push build takes those layers from the builder cache - same BUILD_DATE, same cache key.
+.scriptBuild: &scriptBuild
+  - echo "Build BorgBackup Docker image '${VERSION}' on alpine:${ALPINE_VERSION}"
+  - docker buildx build . --load --pull --no-cache -t borgbackup:test
+      --build-arg ALPINE_VERSION=${ALPINE_VERSION} --build-arg IMAGE_TAG=${VERSION} --build-arg BUILD_DATE=${BUILD_DATE}
+  - docker run --rm borgbackup:test --version
+  - docker buildx build . --push --pull --platform ${BUILD_PLATFORMS} ${TAGS}
+      --build-arg ALPINE_VERSION=${ALPINE_VERSION} --build-arg IMAGE_TAG=${VERSION} --build-arg BUILD_DATE=${BUILD_DATE}
+
+.weekly:
+  extends: [.docker, .branch]
+  stage: build
+  script:
+    - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    - |
+      TAGS=""
+      for tag in ${VERSION} ${EXTRA_TAGS}; do
+        TAGS="${TAGS} -t ${CI_REGISTRY_IMAGE}:${tag} -t ${DOCKER_REGISTRY}:${tag}"
+      done
+    - *scriptBuild
+  retry: 2
 
 latest:
-  stage: build
+  extends: .weekly
   variables:
-    TAG_VERSION: latest
-    BASE_IMAGE_VERSION: latest
-  script: &defaultBuildScript
-    - echo "Build BorgBackup Docker image with version '${TAG_VERSION}'"
-    - docker buildx use epicbuilder > /dev/null 2>&1 || docker buildx create --name epicbuilder --use > /dev/null 2>&1 && docker buildx inspect epicbuilder --bootstrap > /dev/null 2>&1
-    - docker buildx build . --push --pull --no-cache
-        --platform linux/amd64,linux/arm64
-        -t $CI_REGISTRY_IMAGE:$TAG_VERSION
-        -t $DOCKER_REGISTRY:$TAG_VERSION
-        --build-arg IMAGE_TAG=$BASE_IMAGE_VERSION
-        --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-    - docker run --rm $CI_REGISTRY_IMAGE:$TAG_VERSION --version
-  only:
-    - master
+    VERSION: "latest"
+    ALPINE_VERSION: "latest"
 
 edge:
-  stage: build
+  extends: .weekly
   variables:
-    TAG_VERSION: edge
-    BASE_IMAGE_VERSION: edge
-  script: *defaultBuildScript
-  only:
-    - master
-
-v3.24:
-  stage: build
-  variables:
-    TAG_VERSION: "3.24"
-    BASE_IMAGE_VERSION: "3.24"
-  script: *defaultBuildScript
-  only:
-    - master
+    VERSION: "edge"
+    ALPINE_VERSION: "edge"
 
 stable:
-  stage: version
+  extends: .weekly
   variables:
-    SOURCE_TAG: "3.24"
-    TARGET_TAG: stable
-    GIT_STRATEGY: none
+    VERSION: "${STABLE_VERSION}"
+    ALPINE_VERSION: "${STABLE_VERSION}"
+    EXTRA_TAGS: "stable"
+
+#### Versioned release from a git tag 'X.Y.Z' on the stable Alpine line - the only tag a deployment should pin.
+#### 'latest' stays with the weekly build on alpine:latest.
+release:
+  extends: [.docker, .tag]
+  stage: build
+  variables:
+    VERSION: "${CI_COMMIT_TAG}"
+    ALPINE_VERSION: "${STABLE_VERSION}"
   script:
-    - docker pull $CI_REGISTRY_IMAGE:$SOURCE_TAG
-    - docker tag $CI_REGISTRY_IMAGE:$SOURCE_TAG $CI_REGISTRY_IMAGE:$TARGET_TAG
-    - docker push $CI_REGISTRY_IMAGE:$TARGET_TAG
-  only:
-    - master
+    #### a block scalar: as a plain list item the ': ' inside the message would make YAML read a key
+    - |
+      if ! grep -q "^## \[${VERSION}\] - " CHANGELOG.md; then
+        echo "CHANGELOG.md has no entry '## [${VERSION}] - <date>'"
+        exit 1
+      fi
+    - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    - MAJOR_MINOR="${VERSION%.*}"
+    - MAJOR="${MAJOR_MINOR%.*}"
+    - |
+      TAGS=""
+      for tag in "${VERSION}" "${MAJOR_MINOR}" "${MAJOR}"; do
+        TAGS="${TAGS} -t ${CI_REGISTRY_IMAGE}:${tag} -t ${DOCKER_REGISTRY}:${tag}"
+      done
+    - *scriptBuild
+  retry: 1
 
 uploadReadme:
+  extends: .branch
   stage: release
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - docker run --rm -v $PWD:/workspace
+    #### Docker Hub takes at most 25,000 characters - counted in bytes here, which is stricter
+    - |
+      size=$(wc -c < README.md)
+      if [ "$size" -gt 25000 ]; then
+        echo "README.md has $size bytes, Docker Hub takes 25000"
+        exit 1
+      fi
+    #### '-e NAME' without a value takes it from the environment - '-e NAME=value' would put the token in the process list
+    - DOCKERHUB_PASSWORD="$DOCKER_HUB_TOKEN" docker run --rm -v $PWD:/workspace
       -e DOCKERHUB_USERNAME=${DOCKER_HUB_USER}
-      -e DOCKERHUB_PASSWORD=${DOCKER_HUB_TOKEN}
+      -e DOCKERHUB_PASSWORD
       -e DOCKERHUB_REPOSITORY=${DOCKER_REGISTRY}
-      -e SHORT_DESCRIPTION="Simple BorgBackup Docker Image"
+      -e SHORT_DESCRIPTION="BorgBackup on Alpine for deduplicated, encrypted backups - amd64 and arm64, rebuilt weekly"
       -e README_FILEPATH='/workspace/README.md'
         peterevans/dockerhub-description:4
   retry: 2
-  only:
-    - master
+
+#### The code reaches GitHub through the GitLab push mirror, so this job waits for the tag there.
+#### GITHUB_TOKEN: fine-grained token with Contents read and write, a protected variable - the tag must be protected too.
+github-release:
+  extends: .tag
+  stage: release
+  image: epicsoft/ci:latest
+  needs:
+    - job: release
+  variables:
+    GITHUB_REPO: "epicsoft-llc/${CI_PROJECT_NAME}"
+  script:
+    - |
+      api="https://api.github.com/repos/${GITHUB_REPO}"
+      #### curl reads the header from a file, so the token stays out of the process list
+      auth_file=$(mktemp)
+      printf 'Authorization: Bearer %s\n' "${GITHUB_TOKEN}" > "$auth_file"
+      auth="@$auth_file"
+      notes=$(awk -v head="## [${CI_COMMIT_TAG}]" 'index($0, head) == 1 { found = 1; next } /^## / { found = 0 } found' CHANGELOG.md)
+      if [ -z "$notes" ]; then
+        echo "CHANGELOG.md has no entry for ${CI_COMMIT_TAG}"
+        exit 1
+      fi
+      if curl -sf -H "$auth" "$api/releases/tags/${CI_COMMIT_TAG}" > /dev/null; then
+        echo "Release ${CI_COMMIT_TAG} already exists on GitHub"
+        exit 0
+      fi
+      tries=0
+      until curl -sf -H "$auth" "$api/git/ref/tags/${CI_COMMIT_TAG}" > /dev/null; do
+        tries=$((tries + 1))
+        if [ "$tries" -ge 60 ]; then
+          echo "Tag ${CI_COMMIT_TAG} did not reach GitHub within 10 minutes - check the push mirror"
+          exit 1
+        fi
+        sleep 10
+      done
+      jq -n --arg tag "${CI_COMMIT_TAG}" --arg body "$notes" '{tag_name: $tag, name: $tag, body: $body}' \
+        | curl -sS --fail-with-body -X POST -H "$auth" -H "Accept: application/vnd.github+json" "$api/releases" -d @- > /dev/null
+      echo "Release ${CI_COMMIT_TAG} created on GitHub"
