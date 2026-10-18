@@ -20,7 +20,9 @@ LABEL image.name="epicsoft_borgbackup" \
       maintainer.copyright="Copyright 2022-2026 epicsoft LLC" \
       license="MIT"
 
-RUN apk --no-cache add borgbackup \
+#### packages of the base image lag behind the Alpine repository - the upgrade brings their security fixes
+RUN apk --no-cache upgrade \
+ && apk --no-cache add borgbackup \
                        py3-packaging \
                        libffi-dev \
                        openssl-dev \

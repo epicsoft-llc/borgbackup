@@ -64,7 +64,8 @@ pushed to GitHub directly; the mirror would overwrite them.
 - The entry names the contained versions under `### Contents` — BorgBackup, Python and
   Alpine of the stable line, read from the current weekly image right before tagging:
   `docker run --rm --entrypoint sh epicsoft/borgbackup:stable -c 'cat /etc/alpine-release; borg --version; python3 --version'`
-- `README.md`: the `## Versions` section, if versions changed
+- `README.md`: the `## Versions` section, if versions changed, and on a new minor or major
+  version the `X.Y` in the examples
 - Tag on `master`, **without `v`**: `X.Y.Z`
 
 ### A new Alpine line
@@ -87,4 +88,6 @@ docker run --rm borgbackup:local --version
 - Commit messages use `feat:` / `fix:` / `ci:` / `chore:` prefixes.
 - Dockerfile style: one `RUN` per concern, packages one per line with `\`
   continuations, upstream reference URLs as `####` comments above the block.
+- `apk --no-cache upgrade` comes before `apk add`: `apk add` never upgrades the packages
+  of the base image, so their security fixes would only arrive with the next base image.
 - `CHANGELOG.md`: an entry goes under the version of its release tag.

@@ -15,6 +15,22 @@ the versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 on `alpine:latest`. Each release entry names the contained versions: BorgBackup, Python and Alpine. The weekly builds
 (`latest`, `edge`, `stable`) are not listed here.
 
+## [1.0.1] - 2026-10-18
+
+### Contents
+
+- BorgBackup `1.4.4`, Python `3.14.8`, Alpine `3.24.2`
+
+### Security
+
+- The packages of the base image are upgraded as well (`apk upgrade`). `apk add` only installs what is missing, so
+  1.0.0 kept zlib from the `alpine` image without the fix for CVE-2026-85091, although Alpine `3.24` already offered
+  it
+
+### Changed
+
+- The README examples use `1.0` instead of a single release
+
 ## [1.0.0] - 2026-10-18
 
 ### Contents

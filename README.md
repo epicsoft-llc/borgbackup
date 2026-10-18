@@ -20,13 +20,13 @@ contained versions are listed in the [changelog](https://gitlab.com/epicsoft-net
 
 | Tag | Content |
 |---|---|
-| `1.0.0` | exactly this build - **use this in production** |
+| `1.0.1` | exactly this build - **use this in production** |
 | `1.0`, `1` | newest release of that line |
 | `stable`, `3.24` | rebuilt weekly on `alpine:3.24` |
 | `latest` | rebuilt weekly on `alpine:latest` |
 | `edge` | rebuilt weekly on `alpine:edge` - newest BorgBackup from Alpine edge, not for production |
 
-`1.0.0` contains BorgBackup `1.4.4`, Python `3.14.8` and Alpine `3.24.2`. The BorgBackup version is the one the
+`1.0.1` contains BorgBackup `1.4.4`, Python `3.14.8` and Alpine `3.24.2`. The BorgBackup version is the one the
 Alpine release ships.
 
 No longer built: `3.21` (Alpine `3.21`), `latest-arm` and `stable-arm` - `linux/arm64` is part of every tag.
@@ -46,7 +46,7 @@ Alpine packages are installed in the current image in the latest version - https
 Displays the version and help from BorgBackup
 
 ```bash
-docker run --rm epicsoft/borgbackup:1.0.0
+docker run --rm epicsoft/borgbackup:1.0
 ```
 
 ```bash
@@ -63,7 +63,7 @@ After entering the password, the repository is created in the `/target` director
 docker run --rm -it --name borg \
   -v /tmp/backup/target:/target \
   -v /tmp/backup/source:/source:ro \
-  epicsoft/borgbackup:1.0.0 init --encryption=repokey /target
+  epicsoft/borgbackup:1.0 init --encryption=repokey /target
 ```
 
 ```bash
@@ -80,7 +80,7 @@ docker run --rm -it --name borg \
   -e BORG_PASSPHRASE=secret \
   -v /tmp/backup/target:/target \
   -v /tmp/backup/source:/source:ro \
-  epicsoft/borgbackup:1.0.0 create /target::archiveName /source --stats
+  epicsoft/borgbackup:1.0 create /target::archiveName /source --stats
 ```
 
 ```bash
@@ -99,7 +99,7 @@ docker run --rm -it --name borg \
   -e BORG_PASSPHRASE=secret \
   -v /tmp/backup/target:/target \
   -v /tmp/backup/source:/source:ro \
-  epicsoft/borgbackup:1.0.0 list /target
+  epicsoft/borgbackup:1.0 list /target
 ```
 
 ```bash
